@@ -9,11 +9,13 @@ import {
   Easing,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { GirlComputer } from "../src/components/GirlComputer";
 import { useBackground } from "../src/context/BackgroundContext";
 
 export default function Home() {
   const { background } = useBackground();
+  const router = useRouter();
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(40)).current;
@@ -57,6 +59,10 @@ export default function Home() {
       ]),
     ]).start();
   }, [cardOpacity, cardTranslateY, logoScale, buttonOpacity, buttonTranslateY]);
+
+  function handleStart() {
+    router.push("/cadastro");
+  }
 
   return (
     <LinearGradient colors={background.colors} style={styles.container}>
@@ -105,7 +111,7 @@ export default function Home() {
               transform: [{ translateY: buttonTranslateY }],
             }}
           >
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleStart}>
               <Text style={styles.buttonText}>Iniciar</Text>
             </TouchableOpacity>
           </Animated.View>
