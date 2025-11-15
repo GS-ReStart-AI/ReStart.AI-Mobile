@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Image,
   Animated,
   Easing,
@@ -14,7 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 
-export default function Cadastro() {
+export default function Login() {
   const { background } = useBackground();
   const router = useRouter();
 
@@ -61,8 +60,13 @@ export default function Cadastro() {
     ]).start();
   }, [cardOpacity, cardTranslateY, logoScale, buttonOpacity, buttonTranslateY]);
 
-  function handleGoToLogin() {
-    router.push("/login");
+  function handleGoToCadastro() {
+    router.push("/cadastro");
+  }
+
+  function handleLogin() {
+    // depois a gente liga isso no seu backend C#
+    console.log("login...");
   }
 
   return (
@@ -80,10 +84,7 @@ export default function Cadastro() {
           colors={["#a3cbff", "#c8d6f0"]}
           style={styles.card}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <View style={styles.content}>
             <Animated.View
               style={[
                 styles.logoWrapper,
@@ -96,35 +97,7 @@ export default function Cadastro() {
               />
             </Animated.View>
 
-            <Text style={styles.formTitle}>Cadastro</Text>
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Nome completo:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Digite seu nome completo"
-                placeholderTextColor="#7c8aa3"
-              />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>CPF:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="000.000.000-00"
-                keyboardType="numeric"
-                placeholderTextColor="#7c8aa3"
-              />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Data de nascimento</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="dd/mm/aaaa"
-                placeholderTextColor="#7c8aa3"
-              />
-            </View>
+            <Text style={styles.formTitle}>Login</Text>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Email:</Text>
@@ -147,9 +120,9 @@ export default function Cadastro() {
               />
             </View>
 
-            <TouchableOpacity onPress={handleGoToLogin}>
-              <Text style={styles.loginText}>
-                Já possui conta? Fazer login
+            <TouchableOpacity onPress={handleGoToCadastro}>
+              <Text style={styles.registerText}>
+                Não possui conta? Se cadastre-se
               </Text>
             </TouchableOpacity>
 
@@ -160,11 +133,11 @@ export default function Cadastro() {
                 transform: [{ translateY: buttonTranslateY }],
               }}
             >
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Acessar</Text>
               </TouchableOpacity>
             </Animated.View>
-          </ScrollView>
+          </View>
         </LinearGradient>
       </Animated.View>
     </LinearGradient>
@@ -190,7 +163,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 32,
   },
-  scrollContent: {
+  content: {
     paddingVertical: 32,
     paddingHorizontal: 24,
   },
@@ -202,7 +175,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     resizeMode: "contain",
-    marginBottom: -23,
+    marginBottom: -23, 
   },
   formTitle: {
     fontSize: 24,
@@ -230,7 +203,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
-  loginText: {
+  registerText: {
     textAlign: "center",
     fontSize: 12,
     marginTop: 8,
