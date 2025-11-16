@@ -9,7 +9,6 @@ import {
   Easing,
   ScrollView,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
@@ -21,6 +20,7 @@ export default function HomeApp() {
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(30)).current;
   const submitScale = useRef(new Animated.Value(1)).current;
+  const spinnerRotation = useRef(new Animated.Value(0)).current;
 
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [resumeText, setResumeText] = useState("");
@@ -42,6 +42,17 @@ export default function HomeApp() {
       }),
     ]).start();
   }, [cardOpacity, cardTranslateY]);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(spinnerRotation, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, [spinnerRotation]);
 
   const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -135,19 +146,33 @@ export default function HomeApp() {
     </View>
   );
 
-  const renderLoading = () => (
-    <View style={styles.loadingCard}>
-      <Text style={styles.loadingTopText}>
-        Calma, estamos analisando seu currículo...
-      </Text>
+  const renderLoading = () => {
+    const spin = spinnerRotation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "360deg"],
+    });
 
-      <View style={styles.loadingIndicatorWrapper}>
-        <ActivityIndicator size="large" />
+    return (
+      <View style={styles.loadingCard}>
+        <Text style={styles.loadingTopText}>
+          Calma, estamos analisando seu currículo...
+        </Text>
+
+        <View style={styles.loadingIndicatorWrapper}>
+          <Animated.View
+            style={[
+              styles.spinnerOuter,
+              {
+                transform: [{ rotate: spin }],
+              },
+            ]}
+          />
+        </View>
+
+        <Text style={styles.loadingBottomText}>Lendo as informações...</Text>
       </View>
-
-      <Text style={styles.loadingBottomText}>Lendo as informações...</Text>
-    </View>
-  );
+    );
+  };
 
   return (
     <LinearGradient colors={background.colors} style={styles.container}>
@@ -322,5 +347,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#050B24",
     textAlign: "center",
+  },
+  spinnerOuter: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 7,
+    borderColor: "rgba(245,245,255,0.7)",
+    borderTopColor: "#a855f7",
   },
 });
