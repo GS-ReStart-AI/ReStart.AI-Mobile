@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "restartai",
     "ios": {
       "supportsTablet": true
     },
