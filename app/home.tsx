@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
 import { useBackground } from "../src/context/BackgroundContext";
+import AppLogo from "../src/components/AppLogo";
 
 export default function HomeApp() {
   const { background } = useBackground();
@@ -190,6 +191,7 @@ export default function HomeApp() {
           ]}
         >
           <View style={styles.blockWrapper}>
+            <AppLogo />
             <Text style={styles.titleCentered}>Passaporte de Talentos</Text>
             {isSubmitting ? renderLoading() : renderForm()}
           </View>
@@ -221,6 +223,7 @@ const styles = StyleSheet.create({
     color: "#050B24",
     textAlign: "center",
     marginBottom: 24,
+    padding: 20,
   },
   formCard: {
     borderRadius: 32,
