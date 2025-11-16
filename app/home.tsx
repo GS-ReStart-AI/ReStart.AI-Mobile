@@ -9,10 +9,10 @@ import {
   Easing,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
-import { router } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 
 export default function HomeApp() {
@@ -30,47 +30,43 @@ export default function HomeApp() {
     Animated.parallel([
       Animated.timing(cardOpacity, {
         toValue: 1,
-        duration: 350,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
-        easing: Easing.out(Easing.quad),
       }),
       Animated.timing(cardTranslateY, {
         toValue: 0,
-        duration: 350,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
-        easing: Easing.out(Easing.quad),
       }),
     ]).start();
   }, [cardOpacity, cardTranslateY]);
 
-  async function handlePickPdf() {
+  const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: "application/pdf",
-      copyToCacheDirectory: true,
+      copyToCacheDirectory: false,
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const file = result.assets[0];
-      setSelectedFileName(file.name ?? "Currículo selecionado");
+      setSelectedFileName(file.name);
+      if (!resumeText) {
+        setResumeText("");
+      }
     }
-  }
+  };
 
-  function handleSubmit() {
-    if (isSubmitting) return;
-
+  const handleSubmit = () => {
     if (!selectedFileName && !resumeText.trim()) {
-      Alert.alert(
-        "Dados incompletos",
-        "Selecione um PDF ou cole o texto do seu currículo antes de enviar."
-      );
+      Alert.alert("Atenção", "Envie um PDF ou cole o texto do seu currículo.");
       return;
     }
 
-    setIsSubmitting(true);
-
     Animated.sequence([
       Animated.timing(submitScale, {
-        toValue: 0.95,
+        toValue: 0.96,
         duration: 80,
         useNativeDriver: true,
       }),
@@ -79,121 +75,101 @@ export default function HomeApp() {
         duration: 80,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      router.push("/homeLoading");
-    });
-  }
+    ]).start();
+
+    setIsSubmitting(true);
+  };
+
+  const renderForm = () => (
+    <View style={styles.formCard}>
+      <Text style={styles.subtitle}>
+        Envie seu currículo para montarmos um plano de migração de area
+      </Text>
+
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.uploadButton} onPress={handlePickFile}>
+          <Text style={styles.uploadButtonText}>Currículo</Text>
+        </TouchableOpacity>
+        <Text style={styles.helperText}>
+          PDF com texto, até 2 MB (Máximo duas páginas)
+        </Text>
+
+        {selectedFileName && (
+          <View style={styles.fileInfoContainer}>
+            <View style={styles.fileBadge}>
+              <Text style={styles.fileBadgeIcon}>✔</Text>
+            </View>
+            <View style={styles.fileTextWrapper}>
+              <Text style={styles.fileTitle}>PDF adicionado</Text>
+              <Text style={styles.fileName}>{selectedFileName}</Text>
+            </View>
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.orText}>Ou</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Cole o texto do seu currículo</Text>
+        <View style={styles.textAreaWrapper}>
+          <TextInput
+            style={styles.textArea}
+            placeholder="Digite ou cole seu currículo aqui"
+            placeholderTextColor="#9BA4C1"
+            multiline
+            value={resumeText}
+            onChangeText={setResumeText}
+            textAlignVertical="top"
+          />
+        </View>
+        <Text style={styles.helperText}>
+          Limite de 10.000 caracteres (UTF-8)
+        </Text>
+      </View>
+
+      <Animated.View style={{ transform: [{ scale: submitScale }] }}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Enviar currículo</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
+  );
+
+  const renderLoading = () => (
+    <View style={styles.loadingCard}>
+      <Text style={styles.loadingTopText}>
+        Calma, estamos analisando seu currículo...
+      </Text>
+
+      <View style={styles.loadingIndicatorWrapper}>
+        <ActivityIndicator size="large" />
+      </View>
+
+      <Text style={styles.loadingBottomText}>Lendo as informações...</Text>
+    </View>
+  );
 
   return (
     <LinearGradient colors={background.colors} style={styles.container}>
-      <View style={styles.headerMenuRow}>
-        <View style={styles.menuIcon}>
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-        </View>
-      </View>
-
-      <Text style={styles.headerTitle}>Passaporte de Talentos</Text>
-
-      <Animated.View
-        style={[
-          styles.cardWrapper,
-          {
-            opacity: cardOpacity,
-            transform: [{ translateY: cardTranslateY }],
-          },
-        ]}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <LinearGradient colors={["#a3cbff", "#c8d6f0"]} style={styles.panel}>
-          <ScrollView
-            contentContainerStyle={styles.panelScroll}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.panelText}>
-              Envie seu currículo para montarmos{"\n"}
-              um plano de migração de area
-            </Text>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={styles.curriculoButton}
-              onPress={handlePickPdf}
-            >
-              <Text style={styles.curriculoButtonText}>Currículo</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.curriculoHint}>
-              PDF com texto, até 2 MB (Máximo duas páginas)
-            </Text>
-
-            {selectedFileName && (
-              <View style={styles.selectedFileBadge}>
-                <View style={styles.selectedFileLeft}>
-                  <View style={styles.selectedFileIconCircle}>
-                    <Text style={styles.selectedFileIconText}>✓</Text>
-                  </View>
-                  <View style={styles.selectedFileTextColumn}>
-                    <Text style={styles.selectedFileBadgeTitle}>
-                      PDF adicionado
-                    </Text>
-                    <Text
-                      style={styles.selectedFileText}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {selectedFileName}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            )}
-
-            <Text style={styles.ouText}>Ou</Text>
-
-            <View style={styles.textAreaCard}>
-              <Text style={styles.textAreaLabel}>
-                Cole o texto do{"\n"}seu currículo
-              </Text>
-
-              <TextInput
-                style={styles.textAreaInput}
-                multiline
-                value={resumeText}
-                onChangeText={setResumeText}
-                placeholder="Digite ou cole seu currículo aqui"
-                placeholderTextColor="#7c8aa3"
-                textAlignVertical="top"
-              />
-            </View>
-
-            <Text style={styles.limitText}>
-              Limite de 10.000 caracteres (UTF-8)
-            </Text>
-
-            <Animated.View
-              style={{
-                width: "100%",
-                transform: [{ scale: submitScale }],
-              }}
-            >
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  isSubmitting && styles.submitButtonDisabled,
-                ]}
-                activeOpacity={0.9}
-                onPress={handleSubmit}
-              >
-                <Text style={styles.submitButtonText}>
-                  {isSubmitting ? "Enviando..." : "Enviar currículo"}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </ScrollView>
-        </LinearGradient>
-      </Animated.View>
+        <Animated.View
+          style={[
+            styles.animatedWrapper,
+            {
+              opacity: cardOpacity,
+              transform: [{ translateY: cardTranslateY }],
+            },
+          ]}
+        >
+          <View style={styles.blockWrapper}>
+            <Text style={styles.titleCentered}>Passaporte de Talentos</Text>
+            {isSubmitting ? renderLoading() : renderForm()}
+          </View>
+        </Animated.View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -201,173 +177,150 @@ export default function HomeApp() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
-    paddingBottom: 24,
-    alignItems: "center",
   },
-  headerMenuRow: {
-    width: "90%",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  menuIcon: {
-    width: 22,
-    alignItems: "flex-end",
-    gap: 3,
-  },
-  menuLine: {
-    width: 18,
-    height: 2,
-    borderRadius: 999,
-    backgroundColor: "#000",
-  },
-  headerTitle: {
-    width: "90%",
-    marginTop: 62,
-    marginBottom: 16,
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  cardWrapper: {
-    width: "90%",
+  scrollContent: {
     flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+  animatedWrapper: {
+    flex: 1,
     justifyContent: "center",
   },
-  panel: {
+  blockWrapper: {
+    width: "100%",
+  },
+  titleCentered: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#050B24",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  formCard: {
     borderRadius: 32,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    marginBottom: 90,
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
-  panelScroll: {
-    paddingHorizontal: 4,
-    paddingBottom: 16,
-    alignItems: "center",
-  },
-  panelText: {
-    color: "#0f1b3c",
-    textAlign: "center",
+  subtitle: {
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  curriculoButton: {
-    paddingVertical: 11,
-    paddingHorizontal: 50,
-    borderRadius: 999,
-    backgroundColor: "#dfe9fb",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  curriculoButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#223163",
-  },
-  curriculoHint: {
-    marginTop: 8,
-    fontSize: 10,
     textAlign: "center",
-    color: "#475a8a",
+    color: "#050B24",
+    marginBottom: 24,
   },
-  selectedFileBadge: {
-    marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: "#223163",
-    alignItems: "center",
+  section: {
+    marginBottom: 24,
+  },
+  uploadButton: {
     alignSelf: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 8,
   },
-  selectedFileLeft: {
+  uploadButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#050B24",
+  },
+  helperText: {
+    fontSize: 11,
+    textAlign: "center",
+    color: "#050B24",
+    opacity: 0.8,
+  },
+  fileInfoContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#111827",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 16,
   },
-  selectedFileIconCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#8ad0ff",
+  fileBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#60A5FA",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 8,
+    marginRight: 12,
   },
-  selectedFileIconText: {
-    color: "#0f1b3c",
-    fontSize: 14,
-    fontWeight: "bold",
+  fileBadgeIcon: {
+    color: "#60A5FA",
+    fontSize: 16,
   },
-  selectedFileTextColumn: {
-    maxWidth: 220,
+  fileTextWrapper: {
+    flex: 1,
   },
-  selectedFileBadgeTitle: {
-    fontSize: 11,
+  fileTitle: {
+    color: "#E5E7EB",
+    fontSize: 13,
     fontWeight: "600",
-    color: "#ffffff",
-    marginBottom: 1,
   },
-  selectedFileText: {
-    fontSize: 10,
-    color: "#dfe9fb",
+  fileName: {
+    color: "#D1D5DB",
+    fontSize: 12,
   },
-  ouText: {
-    marginTop: 18,
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0f1b3c",
-  },
-  textAreaCard: {
-    width: "100%",
-    marginTop: 12,
-    borderRadius: 24,
-    backgroundColor: "#cddcff",
-    paddingVertical: 18,
-    paddingHorizontal: 14,
-    alignItems: "center",
-  },
-  textAreaLabel: {
-    fontSize: 16,
+  orText: {
     textAlign: "center",
-    color: "#223163",
-    marginBottom: 12,
-  },
-  textAreaInput: {
-    width: "100%",
-    height: 140,
-    maxHeight: 160,
-    borderRadius: 16,
-    backgroundColor: "#dfe9fb",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
     fontSize: 14,
-    borderWidth: 1,
-    borderColor: "#c2d4f5",
+    fontWeight: "600",
+    color: "#050B24",
+    marginBottom: 16,
   },
-  limitText: {
-    marginTop: 16,
-    fontSize: 10,
-    color: "#0f1b3c",
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#050B24",
+    marginBottom: 8,
     textAlign: "center",
+  },
+  textAreaWrapper: {
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    padding: 12,
+  },
+  textArea: {
+    minHeight: 140,
+    fontSize: 14,
+    color: "#050B24",
   },
   submitButton: {
-    marginTop: 20,
-    width: "100%",
-    paddingVertical: 16,
+    marginTop: 12,
     borderRadius: 999,
     backgroundColor: "#000000",
+    paddingVertical: 16,
     alignItems: "center",
-  },
-  submitButtonDisabled: {
-    opacity: 0.7,
   },
   submitButtonText: {
     color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  loadingCard: {
+    borderRadius: 32,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    backgroundColor: "rgba(255,255,255,0.35)",
+    alignItems: "center",
+  },
+  loadingTopText: {
+    fontSize: 15,
+    color: "#050B24",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  loadingIndicatorWrapper: {
+    marginBottom: 24,
+  },
+  loadingBottomText: {
+    fontSize: 14,
+    color: "#050B24",
+    textAlign: "center",
   },
 });
