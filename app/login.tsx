@@ -1,17 +1,20 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Image,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useBackground } from "../src/context/BackgroundContext";
+import AppLogo from "../src/components/AppLogo";
+import { api } from "../src/services/api";
 
 export default function Login() {
   const { background } = useBackground();
@@ -22,6 +25,11 @@ export default function Login() {
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const buttonTranslateY = useRef(new Animated.Value(20)).current;
   const buttonOpacity = useRef(new Animated.Value(0)).current;
+
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     Animated.sequence([
@@ -64,8 +72,62 @@ export default function Login() {
     router.push("/cadastro");
   }
 
-  function handleLogin() {
-    router.push("/home");
+  function isEmailValido(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed.includes("@")) return false;
+    if (!trimmed.includes(".")) return false;
+    if (trimmed.startsWith("@") || trimmed.endsWith("@")) return false;
+    return true;
+  }
+
+  async function handleLogin() {
+    if (!email.trim() || !isEmailValido(email)) {
+      Alert.alert("Atenção", "Informe um email válido.");
+      return;
+    }
+
+    if (!senha.trim()) {
+      Alert.alert("Atenção", "Informe sua senha.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const response = await api.post("/api/Auth/login", {
+        email: normalizedEmail,
+        senha,
+        password: senha,
+      });
+
+      const token = response.data?.token;
+      const expiresAt = response.data?.expiresAt;
+
+      console.log("LOGIN OK", { token, expiresAt });
+
+      Alert.alert("Bem-vindo(a)", "Login realizado com sucesso!", [
+        {
+          text: "OK",
+          onPress: () => router.push("/home"),
+        },
+      ]);
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const data = error?.response?.data;
+      console.log("ERRO LOGIN", status, data);
+
+      if (status === 401) {
+        Alert.alert("Credenciais inválidas", "Email ou senha incorretos.");
+      } else {
+        Alert.alert(
+          "Erro",
+          "Não foi possível realizar o login. Tente novamente."
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -79,10 +141,7 @@ export default function Login() {
           },
         ]}
       >
-        <LinearGradient
-          colors={["#a3cbff", "#c8d6f0"]}
-          style={styles.card}
-        >
+        <LinearGradient colors={["#a3cbff", "#c8d6f0"]} style={styles.card}>
           <View style={styles.content}>
             <Animated.View
               style={[
@@ -90,10 +149,7 @@ export default function Login() {
                 { transform: [{ scale: logoScale }] },
               ]}
             >
-              <Image
-                source={require("../assets/img/ReStart.Ai.png")}
-                style={styles.logo}
-              />
+              <AppLogo />
             </Animated.View>
 
             <Text style={styles.formTitle}>Login</Text>
@@ -106,17 +162,33 @@ export default function Login() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 placeholderTextColor="#7c8aa3"
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Senha:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Digite sua senha"
-                secureTextEntry
-                placeholderTextColor="#7c8aa3"
-              />
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="Digite sua senha"
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#7c8aa3"
+                  value={senha}
+                  onChangeText={setSenha}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword((prev) => !prev)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#4b5563"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity onPress={handleGoToCadastro}>
@@ -132,8 +204,14 @@ export default function Login() {
                 transform: [{ translateY: buttonTranslateY }],
               }}
             >
-              <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Acessar</Text>
+              <TouchableOpacity
+                style={[styles.button, isSubmitting && { opacity: 0.7 }]}
+                onPress={handleLogin}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.buttonText}>
+                  {isSubmitting ? "Entrando..." : "Acessar"}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
           </View>
@@ -170,12 +248,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: -8,
   },
-  logo: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
-    marginBottom: -23,
-  },
   formTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -201,6 +273,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
+  },
+  passwordWrapper: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  passwordInput: {
+    paddingRight: 44,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 14,
+    height: 46,
+    justifyContent: "center",
   },
   registerText: {
     textAlign: "center",

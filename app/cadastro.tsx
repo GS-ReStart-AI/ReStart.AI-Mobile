@@ -153,12 +153,12 @@ export default function Cadastro() {
 
     setIsSubmitting(true);
     try {
-      await api.post("/api/v1/usuarios", {
-        nomeCompleto: nomeCompleto.trim(),
-        cpf: cpfSomenteNumeros,
-        dataNascimento: dataIso,
-        email: email.trim(),
-        senha: senha,
+      await api.post("/api/Auth/signup", {
+      nomeCompleto: nomeCompleto.trim(),
+      cpf: cpfSomenteNumeros,
+      dataNascimento: dataIso,
+      email: email.trim(),
+      senha: senha,
       });
 
       Alert.alert("Sucesso", "Cadastro realizado com sucesso!", [
