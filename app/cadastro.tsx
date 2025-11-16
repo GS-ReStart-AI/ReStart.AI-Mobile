@@ -65,6 +65,10 @@ export default function Cadastro() {
     router.push("/login");
   }
 
+  function handleAccess() {
+    router.push("/home");
+  }
+
   return (
     <LinearGradient colors={background.colors} style={styles.container}>
       <Animated.View
@@ -160,7 +164,7 @@ export default function Cadastro() {
                 transform: [{ translateY: buttonTranslateY }],
               }}
             >
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity style={styles.button} onPress={handleAccess}>
                 <Text style={styles.buttonText}>Acessar</Text>
               </TouchableOpacity>
             </Animated.View>

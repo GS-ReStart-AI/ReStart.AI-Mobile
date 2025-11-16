@@ -65,8 +65,7 @@ export default function Login() {
   }
 
   function handleLogin() {
-    // depois a gente liga isso no seu backend C#
-    console.log("login...");
+    router.push("/home");
   }
 
   return (
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     resizeMode: "contain",
-    marginBottom: -23, 
+    marginBottom: -23,
   },
   formTitle: {
     fontSize: 24,
