@@ -12,11 +12,20 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
+import { api } from "../src/services/api";
 
 export default function HomeApp() {
   const { background } = useBackground();
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  const usuarioIdParam = params.usuarioId as string | undefined;
+  const usuarioId =
+    usuarioIdParam && usuarioIdParam.length > 0
+      ? usuarioIdParam
+      : "000000000000000000000000";
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(30)).current;
@@ -24,6 +33,7 @@ export default function HomeApp() {
   const spinnerRotation = useRef(new Animated.Value(0)).current;
 
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<any | null>(null);
   const [resumeText, setResumeText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,13 +74,14 @@ export default function HomeApp() {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const file = result.assets[0];
       setSelectedFileName(file.name);
+      setSelectedFile(file);
       if (!resumeText) {
         setResumeText("");
       }
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedFileName && !resumeText.trim()) {
       Alert.alert("Atenção", "Envie um PDF ou cole o texto do seu currículo.");
       return;
@@ -90,6 +101,51 @@ export default function HomeApp() {
     ]).start();
 
     setIsSubmitting(true);
+
+    try {
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", {
+          uri: selectedFile.uri,
+          name: selectedFile.name || "curriculo.pdf",
+          type: selectedFile.mimeType || "application/pdf",
+        } as any);
+        formData.append("usuarioId", usuarioId);
+
+        await api.post("/api/v1/curriculo/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        const payload = {
+          usuarioId: usuarioId,
+          nomeArquivo: "curriculo",
+          texto: resumeText.trim(),
+          skills: [] as string[],
+        };
+
+        await api.post("/api/v1/Curriculo", payload);
+      }
+
+      router.push({ pathname: "/resumo", params: { usuarioId } });
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      const backendMessage =
+        typeof data === "string"
+          ? data
+          : data?.message || data?.error || null;
+
+      const textoStatus = status ? `Erro ${status}. ` : "";
+      const textoBackend = backendMessage
+        ? String(backendMessage)
+        : "Não conseguimos enviar seu currículo agora. Tente novamente em alguns minutos.";
+
+      Alert.alert("Erro", textoStatus + textoBackend);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderForm = () => (

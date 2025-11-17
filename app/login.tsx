@@ -93,12 +93,9 @@ export default function Login() {
 
     setIsSubmitting(true);
     try {
-      const normalizedEmail = email.trim().toLowerCase();
-
       const response = await api.post("/api/Auth/login", {
-        email: normalizedEmail,
+        email: email.trim(),
         senha,
-        password: senha,
       });
 
       const token = response.data?.token;
@@ -114,8 +111,6 @@ export default function Login() {
       ]);
     } catch (error: any) {
       const status = error?.response?.status;
-      const data = error?.response?.data;
-      console.log("ERRO LOGIN", status, data);
 
       if (status === 401) {
         Alert.alert("Credenciais inválidas", "Email ou senha incorretos.");
