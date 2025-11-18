@@ -1,21 +1,97 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useBackground } from "../src/context/BackgroundContext";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { api } from "../src/services/api";
+import People from "../src/components/People";
+
+type ResumoPerfilResponse = {
+  Areas?: string[];
+  areas?: string[];
+  Roles?: string[];
+  roles?: string[];
+  Experiencias?: number;
+  experiencias?: number;
+};
 
 export default function RotasApp() {
   const { background } = useBackground();
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const usuarioIdParam = params.usuarioId as string | undefined;
+  const usuarioId =
+    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
 
-  const cargo = "Atendente de loja";
-  const matchPercent = 92;
-  const motivos =
-    '"Você tem Excel" · "Experiência com atendimento"';
+  const [cargo, setCargo] = useState<string | null>(null);
+  const [matchPercent, setMatchPercent] = useState<number | null>(null);
+  const [motivos, setMotivos] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRotas = async () => {
+      if (!usuarioId) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível identificar o usuário. Faça login novamente.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/login"),
+            },
+          ]
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get<ResumoPerfilResponse>(
+          "/api/usuarios/me/resumo-perfil",
+          {
+            params: { usuarioId },
+          }
+        );
+
+        const data = response.data;
+
+        const areas = data.areas ?? data.Areas ?? [];
+        const roles = data.roles ?? data.Roles ?? [];
+
+        const bestRole = roles.length > 0 ? roles[0] : null;
+        setCargo(bestRole);
+
+        if (bestRole) {
+          setMatchPercent(92);
+          if (areas.length > 0) {
+            setMotivos(
+              `Força em: ${areas.slice(0, 2).join(" · ")}`
+            );
+          } else {
+            setMotivos(
+              "Baseado nas suas experiências e competências mapeadas."
+            );
+          }
+        }
+      } catch {
+        Alert.alert(
+          "Erro",
+          "Não foi possível carregar sua melhor oportunidade. Tente novamente em alguns minutos."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRotas();
+  }, [usuarioId, router]);
 
   return (
     <LinearGradient colors={background.colors} style={styles.container}>
@@ -33,22 +109,39 @@ export default function RotasApp() {
             Vagas onde você já atende os requisitos essenciais.
           </Text>
 
-          <View style={styles.jobContainer}>
-            <Text style={styles.jobLabel}>Cargo:</Text>
-            <Text style={styles.jobTitle}>{cargo}</Text>
-          </View>
+          {isLoading ? (
+            <View style={{ paddingVertical: 40, alignItems: "center" }}>
+              <ActivityIndicator size="large" color="#FFFFFF" />
+            </View>
+          ) : (
+            <>
+              <View style={styles.jobContainer}>
+                <Text style={styles.jobLabel}>Cargo:</Text>
+                <Text style={styles.jobTitle}>
+                  {cargo ??
+                    "Estamos analisando seu currículo para sugerir o melhor papel."}
+                </Text>
+              </View>
 
-          <View style={styles.matchSection}>
-            <Text style={styles.matchLabel}>Match</Text>
-            <Text style={styles.matchValue}>{matchPercent}%</Text>
-          </View>
+              {matchPercent !== null && (
+                <View style={styles.matchSection}>
+                  <Text style={styles.matchLabel}>Match</Text>
+                  <Text style={styles.matchValue}>{matchPercent}%</Text>
+                </View>
+              )}
 
-          <View style={styles.whySection}>
-            <Text style={styles.whyTitle}>Por que você?</Text>
-            <Text style={styles.whyText}>{motivos}</Text>
-          </View>
+              {motivos && (
+                <View style={styles.whySection}>
+                  <Text style={styles.whyTitle}>Por que você?</Text>
+                  <Text style={styles.whyText}>{motivos}</Text>
+                </View>
+              )}
 
-          <View style={styles.illustrationPlaceholder} />
+              <View style={styles.illustrationPlaceholder}>
+                <People width="100%" height="100%" />
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
     </LinearGradient>

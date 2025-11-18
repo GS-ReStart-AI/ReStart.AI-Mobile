@@ -33,7 +33,6 @@ export default function ResumoApp() {
 
   const [areas, setAreas] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
-  const [experiencias, setExperiencias] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -65,11 +64,9 @@ export default function ResumoApp() {
 
         const a = data.areas ?? data.Areas ?? [];
         const r = data.roles ?? data.Roles ?? [];
-        const e = data.experiencias ?? data.Experiencias ?? null;
 
         setAreas(a);
         setRoles(r);
-        setExperiencias(e);
       } catch {
         Alert.alert(
           "Erro",
@@ -137,25 +134,17 @@ export default function ResumoApp() {
                 )}
               </View>
 
-              {experiencias !== null && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Tempo de experiência</Text>
-                  <Text style={styles.experienceText}>
-                    Aproximadamente {experiencias} ano
-                    {experiencias === 1 ? "" : "s"} de experiência relevante.
-                  </Text>
-                </View>
-              )}
-
               <View style={styles.section}>
-                <Text style={styles.sectionTitleCentered}>Próximas ações</Text>
                 <TouchableOpacity
                   style={styles.primaryButton}
-                  onPress={() => router.push("/rotas")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/rotas",
+                      params: { usuarioId },
+                    })
+                  }
                 >
-                  <Text style={styles.primaryButtonText}>
-                    Ver vagas recomendadas
-                  </Text>
+                  <Text style={styles.primaryButtonText}>Próximos passos</Text>
                 </TouchableOpacity>
               </View>
             </>
