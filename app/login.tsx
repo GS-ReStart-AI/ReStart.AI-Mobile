@@ -111,8 +111,6 @@ export default function Login() {
         return;
       }
 
-      console.log("LOGIN OK", { token, expiresAt, usuarioId });
-
       Alert.alert("Bem-vindo(a)", "Login realizado com sucesso!", [
         {
           text: "OK",
