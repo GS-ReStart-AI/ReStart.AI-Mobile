@@ -98,15 +98,26 @@ export default function Login() {
         senha,
       });
 
-      const token = response.data?.token;
-      const expiresAt = response.data?.expiresAt;
+      const token = response.data?.token ?? response.data?.Token;
+      const expiresAt = response.data?.expiresAt ?? response.data?.ExpiresAt;
+      const usuarioId =
+        response.data?.usuarioId ?? response.data?.UsuarioId ?? null;
 
-      console.log("LOGIN OK", { token, expiresAt });
+      if (!usuarioId) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível identificar o usuário. Tente novamente."
+        );
+        return;
+      }
+
+      console.log("LOGIN OK", { token, expiresAt, usuarioId });
 
       Alert.alert("Bem-vindo(a)", "Login realizado com sucesso!", [
         {
           text: "OK",
-          onPress: () => router.push("/home"),
+          onPress: () =>
+            router.push({ pathname: "/home", params: { usuarioId } }),
         },
       ]);
     } catch (error: any) {

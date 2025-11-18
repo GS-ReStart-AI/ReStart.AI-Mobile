@@ -23,9 +23,7 @@ export default function HomeApp() {
   const router = useRouter();
   const usuarioIdParam = params.usuarioId as string | undefined;
   const usuarioId =
-    usuarioIdParam && usuarioIdParam.length > 0
-      ? usuarioIdParam
-      : "000000000000000000000000";
+    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(30)).current;
@@ -82,6 +80,14 @@ export default function HomeApp() {
   };
 
   const handleSubmit = async () => {
+    if (!usuarioId) {
+      Alert.alert(
+        "Erro",
+        "Não foi possível identificar o usuário. Faça login novamente."
+      );
+      return;
+    }
+
     if (!selectedFileName && !resumeText.trim()) {
       Alert.alert("Atenção", "Envie um PDF ou cole o texto do seu currículo.");
       return;
@@ -125,7 +131,7 @@ export default function HomeApp() {
           skills: [] as string[],
         };
 
-        await api.post("/api/v1/Curriculo", payload);
+        await api.post("/api/v1/curriculos", payload);
       }
 
       router.push({ pathname: "/resumo", params: { usuarioId } });

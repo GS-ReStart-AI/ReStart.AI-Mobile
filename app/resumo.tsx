@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
 import { api } from "../src/services/api";
@@ -25,12 +25,11 @@ type ResumoPerfilResponse = {
 
 export default function ResumoApp() {
   const { background } = useBackground();
+  const router = useRouter();
   const params = useLocalSearchParams();
   const usuarioIdParam = params.usuarioId as string | undefined;
   const usuarioId =
-    usuarioIdParam && usuarioIdParam.length > 0
-      ? usuarioIdParam
-      : "000000000000000000000000";
+    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
 
   const [areas, setAreas] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
@@ -39,6 +38,21 @@ export default function ResumoApp() {
 
   useEffect(() => {
     const fetchResumo = async () => {
+      if (!usuarioId) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível identificar o usuário. Faça login novamente.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/login"),
+            },
+          ]
+        );
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await api.get<ResumoPerfilResponse>(
           "/api/usuarios/me/resumo-perfil",
@@ -67,7 +81,7 @@ export default function ResumoApp() {
     };
 
     fetchResumo();
-  }, [usuarioId]);
+  }, [usuarioId, router]);
 
   const renderChipList = (items: string[]) => {
     return items.map((item) => (
@@ -85,11 +99,6 @@ export default function ResumoApp() {
       >
         <View style={styles.header}>
           <AppLogo />
-          <TouchableOpacity style={styles.menuButton}>
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-            <View style={styles.menuLine} />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.contentCard}>
@@ -140,7 +149,10 @@ export default function ResumoApp() {
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitleCentered}>Próximas ações</Text>
-                <TouchableOpacity style={styles.primaryButton}>
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={() => router.push("/rotas")}
+                >
                   <Text style={styles.primaryButtonText}>
                     Ver vagas recomendadas
                   </Text>
@@ -164,27 +176,8 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
-  },
-  menuButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.7)",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 4,
-  },
-  menuLine: {
-    width: 16,
-    height: 2,
-    backgroundColor: "#FFFFFF",
-    marginVertical: 1,
-    borderRadius: 1,
   },
   contentCard: {
     borderRadius: 32,
