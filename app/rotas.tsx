@@ -20,6 +20,12 @@ type ResumoPerfilResponse = {
   roles?: string[];
   Experiencias?: number;
   experiencias?: number;
+  BestRole?: string;
+  bestRole?: string;
+  Match?: number;
+  match?: number;
+  WhyYou?: string;
+  whyYou?: string;
 };
 
 export default function RotasApp() {
@@ -65,20 +71,35 @@ export default function RotasApp() {
         const areas = data.areas ?? data.Areas ?? [];
         const roles = data.roles ?? data.Roles ?? [];
 
-        const bestRole = roles.length > 0 ? roles[0] : null;
+        const bestRoleFromApi = data.bestRole ?? data.BestRole ?? null;
+        const bestRole =
+          bestRoleFromApi ?? (roles.length > 0 ? roles[0] : null);
+
         setCargo(bestRole);
 
-        if (bestRole) {
+        const matchFromApi = data.match ?? data.Match;
+        if (
+          typeof matchFromApi === "number" &&
+          !Number.isNaN(matchFromApi)
+        ) {
+          setMatchPercent(matchFromApi);
+        } else if (bestRole) {
           setMatchPercent(92);
-          if (areas.length > 0) {
-            setMotivos(
-              `Força em: ${areas.slice(0, 2).join(" · ")}`
-            );
-          } else {
-            setMotivos(
-              "Baseado nas suas experiências e competências mapeadas."
-            );
-          }
+        } else {
+          setMatchPercent(null);
+        }
+
+        const whyFromApi = data.whyYou ?? data.WhyYou;
+        if (whyFromApi && whyFromApi.trim().length > 0) {
+          setMotivos(whyFromApi.trim());
+        } else if (bestRole && areas.length > 0) {
+          setMotivos(`Força em: ${areas.slice(0, 2).join(" · ")}`);
+        } else if (bestRole) {
+          setMotivos(
+            "Baseado nas suas experiências e competências mapeadas."
+          );
+        } else {
+          setMotivos(null);
         }
       } catch {
         Alert.alert(

@@ -9,12 +9,14 @@ import {
   Easing,
   ScrollView,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
+import MenuController from "../src/components/MenuController";
 import { api } from "../src/services/api";
 
 export default function HomeApp() {
@@ -50,7 +52,7 @@ export default function HomeApp() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [cardOpacity, cardTranslateY]);
+  }, []);
 
   useEffect(() => {
     Animated.loop(
@@ -61,7 +63,7 @@ export default function HomeApp() {
         useNativeDriver: true,
       })
     ).start();
-  }, [spinnerRotation]);
+  }, []);
 
   const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -238,39 +240,47 @@ export default function HomeApp() {
   };
 
   return (
-    <LinearGradient colors={background.colors} style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Animated.View
-          style={[
-            styles.animatedWrapper,
-            {
-              opacity: cardOpacity,
-              transform: [{ translateY: cardTranslateY }],
-            },
-          ]}
-        >
-          <View style={styles.blockWrapper}>
-            <AppLogo />
-            <Text style={styles.titleCentered}>Passaporte de Talentos</Text>
-            {isSubmitting ? renderLoading() : renderForm()}
-          </View>
-        </Animated.View>
-      </ScrollView>
-    </LinearGradient>
+    <MenuController>
+      <SafeAreaView style={styles.safeArea}>
+        <LinearGradient colors={background.colors} style={styles.container}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Animated.View
+              style={[
+                styles.animatedWrapper,
+                {
+                  opacity: cardOpacity,
+                  transform: [{ translateY: cardTranslateY }],
+                },
+              ]}
+            >
+              <View style={styles.blockWrapper}>
+                <AppLogo />
+                <Text style={styles.titleCentered}>Passaporte de Talentos</Text>
+                {isSubmitting ? renderLoading() : renderForm()}
+              </View>
+            </Animated.View>
+          </ScrollView>
+        </LinearGradient>
+      </SafeAreaView>
+    </MenuController>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
   container: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingVertical: 48,
+    paddingVertical: 24,
   },
   animatedWrapper: {
     flex: 1,
