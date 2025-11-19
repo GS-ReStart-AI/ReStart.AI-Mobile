@@ -5,7 +5,7 @@ type BackgroundConfig = {
 };
 
 const defaultBackground: BackgroundConfig = {
-  colors: ["#6290e4", "#6876b1"],
+  colors: ["#d4bbfd", "#73c1ee"],
 };
 
 type BackgroundContextValue = {
