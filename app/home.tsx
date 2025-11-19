@@ -18,14 +18,18 @@ import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
 import MenuController from "../src/components/MenuController";
 import { api } from "../src/services/api";
+import { useAuth } from "./_layout";
 
 export default function HomeApp() {
   const { background } = useBackground();
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { auth, isLoadingAuth } = useAuth();
+
   const usuarioIdParam = params.usuarioId as string | undefined;
   const usuarioId =
-    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
+    (auth?.usuarioId ? String(auth.usuarioId) : undefined) ||
+    (usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined);
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(30)).current;
@@ -64,6 +68,17 @@ export default function HomeApp() {
       })
     ).start();
   }, []);
+
+  useEffect(() => {
+    if (!isLoadingAuth && !usuarioId) {
+      Alert.alert("Sessão expirada", "Faça login novamente.", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/login"),
+        },
+      ]);
+    }
+  }, [isLoadingAuth, usuarioId, router]);
 
   const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({

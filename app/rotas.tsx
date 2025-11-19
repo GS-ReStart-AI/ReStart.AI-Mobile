@@ -12,6 +12,7 @@ import { useBackground } from "../src/context/BackgroundContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { api } from "../src/services/api";
 import People from "../src/components/People";
+import { useAuth } from "./_layout";
 
 type ResumoPerfilResponse = {
   Areas?: string[];
@@ -32,9 +33,12 @@ export default function RotasApp() {
   const { background } = useBackground();
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { auth, isLoadingAuth } = useAuth();
+
   const usuarioIdParam = params.usuarioId as string | undefined;
   const usuarioId =
-    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
+    (auth?.usuarioId ? String(auth.usuarioId) : undefined) ||
+    (usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined);
 
   const [cargo, setCargo] = useState<string | null>(null);
   const [matchPercent, setMatchPercent] = useState<number | null>(null);
@@ -78,10 +82,7 @@ export default function RotasApp() {
         setCargo(bestRole);
 
         const matchFromApi = data.match ?? data.Match;
-        if (
-          typeof matchFromApi === "number" &&
-          !Number.isNaN(matchFromApi)
-        ) {
+        if (typeof matchFromApi === "number" && !Number.isNaN(matchFromApi)) {
           setMatchPercent(matchFromApi);
         } else if (bestRole) {
           setMatchPercent(92);
@@ -111,8 +112,10 @@ export default function RotasApp() {
       }
     };
 
-    fetchRotas();
-  }, [usuarioId, router]);
+    if (!isLoadingAuth) {
+      fetchRotas();
+    }
+  }, [usuarioId, router, isLoadingAuth]);
 
   return (
     <LinearGradient colors={background.colors} style={styles.container}>

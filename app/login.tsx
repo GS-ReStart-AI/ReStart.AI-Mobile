@@ -15,10 +15,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
 import { api } from "../src/services/api";
+import { useAuth } from "./_layout";
 
 export default function Login() {
   const { background } = useBackground();
   const router = useRouter();
+  const { setAuthData } = useAuth();
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(40)).current;
@@ -110,6 +112,12 @@ export default function Login() {
         );
         return;
       }
+
+      await setAuthData({
+        usuarioId,
+        token: token ?? "",
+        expiresAt: expiresAt ?? "",
+      });
 
       Alert.alert("Bem-vindo(a)", "Login realizado com sucesso!", [
         {

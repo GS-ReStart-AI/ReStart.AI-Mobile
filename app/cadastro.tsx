@@ -16,10 +16,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
 import { api } from "../src/services/api";
+import { useAuth } from "./_layout";
 
 export default function Cadastro() {
   const { background } = useBackground();
   const router = useRouter();
+  const { setAuthData } = useAuth();
 
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardTranslateY = useRef(new Animated.Value(40)).current;
@@ -154,17 +156,44 @@ export default function Cadastro() {
     setIsSubmitting(true);
     try {
       await api.post("/api/Auth/signup", {
-      nomeCompleto: nomeCompleto.trim(),
-      cpf: cpfSomenteNumeros,
-      dataNascimento: dataIso,
-      email: email.trim(),
-      senha: senha,
+        nomeCompleto: nomeCompleto.trim(),
+        cpf: cpfSomenteNumeros,
+        dataNascimento: dataIso,
+        email: email.trim(),
+        senha: senha,
+      });
+
+      const loginResponse = await api.post("/api/Auth/login", {
+        email: email.trim(),
+        senha: senha,
+      });
+
+      const token = loginResponse.data?.token ?? loginResponse.data?.Token;
+      const expiresAt =
+        loginResponse.data?.expiresAt ?? loginResponse.data?.ExpiresAt;
+      const usuarioId =
+        loginResponse.data?.usuarioId ?? loginResponse.data?.UsuarioId ?? null;
+
+      if (!usuarioId) {
+        Alert.alert(
+          "Sucesso parcial",
+          "Cadastro criado, mas não foi possível identificar o usuário para login automático. Faça login manualmente."
+        );
+        router.push("/login");
+        return;
+      }
+
+      await setAuthData({
+        usuarioId,
+        token: token ?? "",
+        expiresAt: expiresAt ?? "",
       });
 
       Alert.alert("Sucesso", "Cadastro realizado com sucesso!", [
         {
           text: "OK",
-          onPress: () => router.push("/home"),
+          onPress: () =>
+            router.push({ pathname: "/home", params: { usuarioId } }),
         },
       ]);
     } catch (error: any) {

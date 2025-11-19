@@ -8,7 +8,9 @@ import {
   Modal,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import AppLogo from "./AppLogo";
+import { useRouter } from "expo-router";
 
 interface SidebarMenuProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface SidebarMenuProps {
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
   const slideAnim = React.useRef(new Animated.Value(300)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const router = useRouter();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -47,7 +50,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
         }),
       ]).start();
     }
-  }, [isOpen]);
+  }, [isOpen, slideAnim, fadeAnim]);
+
+  const handleNavigate = (path: string) => {
+    onClose();
+    router.push(path);
+  };
 
   return (
     <Modal
@@ -58,8 +66,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
     >
       <View style={styles.container}>
         <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-          <TouchableOpacity 
-            style={{ flex: 1 }} 
+          <TouchableOpacity
+            style={{ flex: 1 }}
             onPress={onClose}
             activeOpacity={1}
           />
@@ -73,24 +81,84 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
             },
           ]}
         >
-          <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={onClose}
-            activeOpacity={0.7}
+          <LinearGradient
+            colors={["#d6c7ff", "#b6d4ff"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.sidebarGradient}
           >
-            <MaterialCommunityIcons name="close" size={32} color="#000" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={onClose}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons name="close" size={28} color="#000" />
+            </TouchableOpacity>
 
-          <View style={styles.logoWrapper}>
-            <AppLogo />
-          </View>
+            <View style={styles.logoWrapper}>
+              <AppLogo />
+            </View>
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <Text style={styles.item}>Início</Text>
-          <Text style={styles.item}>Resumo</Text>
-          <Text style={styles.item}>Rotas</Text>
-          <Text style={styles.item}>Perfil</Text>
+            <View style={styles.menu}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleNavigate("/home")}
+                style={styles.menuItem}
+              >
+                <MaterialCommunityIcons
+                  name="home-outline"
+                  size={22}
+                  color="#000"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.itemText}>Inicio</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleNavigate("/resumo")}
+                style={styles.menuItem}
+              >
+                <MaterialCommunityIcons
+                  name="file-document-outline"
+                  size={22}
+                  color="#000"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.itemText}>Resumo</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleNavigate("/rotas")}
+                style={styles.menuItem}
+              >
+                <MaterialCommunityIcons
+                  name="chat-outline"
+                  size={22}
+                  color="#000"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.itemText}>Rotas</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleNavigate("/perfil")}
+                style={styles.menuItem}
+              >
+                <MaterialCommunityIcons
+                  name="account-outline"
+                  size={22}
+                  color="#000"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.itemText}>Perfil</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
         </Animated.View>
       </View>
     </Modal>
@@ -102,49 +170,56 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
   },
-
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
   },
-
   sidebar: {
     position: "absolute",
     right: 0,
     top: 0,
-    width: 280,
     height: "100%",
-    backgroundColor: "#fff",
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    zIndex: 30,
-    elevation: 30,
+    width: 280,
+    paddingVertical: 12,
+    paddingLeft: 8,
   },
-
+  sidebarGradient: {
+    flex: 1,
+    borderTopLeftRadius: 32,
+    borderBottomLeftRadius: 32,
+    paddingTop: 40,
+    paddingHorizontal: 20,
+  },
   closeButton: {
     position: "absolute",
-    top: 20,
-    right: 20,
-    zIndex: 40,
-    elevation: 40,
-    padding: 10,
+    top: 16,
+    right: 16,
+    padding: 8,
   },
-
   logoWrapper: {
     alignItems: "center",
     marginBottom: 20,
   },
-
   divider: {
     width: "100%",
     height: 1,
-    backgroundColor: "#ccc",
+    backgroundColor: "rgba(255,255,255,0.7)",
     marginBottom: 20,
   },
-
-  item: {
-    fontSize: 18,
-    paddingVertical: 15,
+  menu: {
+    gap: 8,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  menuIcon: {
+    marginRight: 10,
+  },
+  itemText: {
+    fontSize: 16,
+    color: "#000",
   },
 });
 

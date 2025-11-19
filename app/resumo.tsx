@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
 import AppLogo from "../src/components/AppLogo";
 import { api } from "../src/services/api";
+import { useAuth } from "./_layout";
 
 type ResumoPerfilResponse = {
   Areas?: string[];
@@ -27,9 +28,12 @@ export default function ResumoApp() {
   const { background } = useBackground();
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { auth, isLoadingAuth } = useAuth();
+
   const usuarioIdParam = params.usuarioId as string | undefined;
   const usuarioId =
-    usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined;
+    (auth?.usuarioId ? String(auth.usuarioId) : undefined) ||
+    (usuarioIdParam && usuarioIdParam.length > 0 ? usuarioIdParam : undefined);
 
   const [areas, setAreas] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
@@ -77,8 +81,10 @@ export default function ResumoApp() {
       }
     };
 
-    fetchResumo();
-  }, [usuarioId, router]);
+    if (!isLoadingAuth) {
+      fetchResumo();
+    }
+  }, [usuarioId, router, isLoadingAuth]);
 
   const renderChipList = (items: string[]) => {
     return items.map((item) => (
