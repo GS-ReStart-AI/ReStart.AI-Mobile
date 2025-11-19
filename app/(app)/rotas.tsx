@@ -8,11 +8,12 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useBackground } from "../src/context/BackgroundContext";
+import { useBackground } from "../../src/context/BackgroundContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { api } from "../src/services/api";
-import People from "../src/components/People";
-import { useAuth } from "./_layout";
+import { api } from "../../src/services/api";
+import People from "../../src/components/People";
+import { useAuth } from "../_layout";
+import MenuController from "../../src/components/MenuController";
 
 type ResumoPerfilResponse = {
   Areas?: string[];
@@ -118,57 +119,59 @@ export default function RotasApp() {
   }, [usuarioId, router, isLoadingAuth]);
 
   return (
-    <LinearGradient colors={background.colors} style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Rotas de recolocação</Text>
-        </View>
+    <MenuController>
+      <LinearGradient colors={background.colors} style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Rotas de recolocação</Text>
+          </View>
 
-        <View style={styles.card}>
-          <Text style={styles.helperText}>Baseado no seu currículo</Text>
-          <Text style={styles.highlightText}>
-            Vagas onde você já atende os requisitos essenciais.
-          </Text>
+          <View style={styles.card}>
+            <Text style={styles.helperText}>Baseado no seu currículo</Text>
+            <Text style={styles.highlightText}>
+              Vagas onde você já atende os requisitos essenciais.
+            </Text>
 
-          {isLoading ? (
-            <View style={{ paddingVertical: 40, alignItems: "center" }}>
-              <ActivityIndicator size="large" color="#FFFFFF" />
-            </View>
-          ) : (
-            <>
-              <View style={styles.jobContainer}>
-                <Text style={styles.jobLabel}>Cargo:</Text>
-                <Text style={styles.jobTitle}>
-                  {cargo ??
-                    "Estamos analisando seu currículo para sugerir o melhor papel."}
-                </Text>
+            {isLoading ? (
+              <View style={{ paddingVertical: 40, alignItems: "center" }}>
+                <ActivityIndicator size="large" color="#FFFFFF" />
               </View>
-
-              {matchPercent !== null && (
-                <View style={styles.matchSection}>
-                  <Text style={styles.matchLabel}>Match</Text>
-                  <Text style={styles.matchValue}>{matchPercent}%</Text>
+            ) : (
+              <>
+                <View style={styles.jobContainer}>
+                  <Text style={styles.jobLabel}>Cargo:</Text>
+                  <Text style={styles.jobTitle}>
+                    {cargo ??
+                      "Estamos analisando seu currículo para sugerir o melhor papel."}
+                  </Text>
                 </View>
-              )}
 
-              {motivos && (
-                <View style={styles.whySection}>
-                  <Text style={styles.whyTitle}>Por que você?</Text>
-                  <Text style={styles.whyText}>{motivos}</Text>
+                {matchPercent !== null && (
+                  <View style={styles.matchSection}>
+                    <Text style={styles.matchLabel}>Match</Text>
+                    <Text style={styles.matchValue}>{matchPercent}%</Text>
+                  </View>
+                )}
+
+                {motivos && (
+                  <View style={styles.whySection}>
+                    <Text style={styles.whyTitle}>Por que você?</Text>
+                    <Text style={styles.whyText}>{motivos}</Text>
+                  </View>
+                )}
+
+                <View style={styles.illustrationPlaceholder}>
+                  <People width="100%" height="100%" />
                 </View>
-              )}
-
-              <View style={styles.illustrationPlaceholder}>
-                <People width="100%" height="100%" />
-              </View>
-            </>
-          )}
-        </View>
-      </ScrollView>
-    </LinearGradient>
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </LinearGradient>
+    </MenuController>
   );
 }
 
@@ -180,6 +183,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingVertical: 32,
+    justifyContent: "center",
   },
   header: {
     alignItems: "center",

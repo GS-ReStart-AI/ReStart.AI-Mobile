@@ -12,10 +12,10 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useBackground } from "../src/context/BackgroundContext";
-import AppLogo from "../src/components/AppLogo";
-import { api } from "../src/services/api";
-import { useAuth } from "./_layout";
+import { useBackground } from "../../src/context/BackgroundContext";
+import AppLogo from "../../src/components/AppLogo";
+import { api } from "../../src/services/api";
+import { useAuth } from "../_layout";
 
 export default function Login() {
   const { background } = useBackground();

@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useBackground } from "../src/context/BackgroundContext";
-import { useAuth } from "./_layout";
-import AppLogo from "../src/components/AppLogo";
-import MenuController from "../src/components/MenuController";
-import { api } from "../src/services/api";
+import { useBackground } from "../../src/context/BackgroundContext";
+import { useAuth } from "../_layout";
+import AppLogo from "../../src/components/AppLogo";
+import MenuController from "../../src/components/MenuController";
+import { api } from "../../src/services/api";
 
 type UsuarioResponse = {
   UsuarioId?: string;
@@ -209,8 +209,6 @@ export default function PerfilApp() {
         cpf: cpfSomenteNumeros,
         dataNascimento: dataIso,
         email: email.trim(),
-        // Senha é obrigatória no backend; se o usuário não digitar nada,
-        // mandamos uma senha fake só para passar na validação.
         senha: senha.trim() || "SenhaPlaceholder123!",
       };
 
@@ -286,6 +284,11 @@ export default function PerfilApp() {
     );
   }
 
+  async function handleLogout() {
+    await clearAuthData();
+    router.replace("/login");
+  }
+
   return (
     <MenuController>
       <SafeAreaView style={styles.safeArea}>
@@ -296,7 +299,6 @@ export default function PerfilApp() {
           >
             <View style={styles.headerRow}>
               <AppLogo />
-              {/* botão de logout removido por enquanto */}
             </View>
 
             <Text style={styles.title}>Meus dados</Text>
@@ -378,36 +380,47 @@ export default function PerfilApp() {
                 <ActivityIndicator size="large" color="#ffffff" />
               </View>
             ) : (
-              <View style={styles.buttonsRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.primaryButton,
-                    !isEditing && styles.primaryButtonOutline,
-                  ]}
-                  onPress={() =>
-                    isEditing ? handleSalvar() : setIsEditing(true)
-                  }
-                  disabled={isSubmitting}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.primaryButtonText}>
-                    {isEditing
-                      ? isSubmitting
-                        ? "Salvando..."
-                        : "Salvar"
-                      : "editar"}
-                  </Text>
-                </TouchableOpacity>
+              <View style={styles.buttonsWrapper}>
+                <View style={styles.buttonsRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.primaryButton,
+                      !isEditing && styles.primaryButtonOutline,
+                    ]}
+                    onPress={() =>
+                      isEditing ? handleSalvar() : setIsEditing(true)
+                    }
+                    disabled={isSubmitting}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.primaryButtonText}>
+                      {isEditing
+                        ? isSubmitting
+                          ? "Salvando..."
+                          : "Salvar"
+                        : "editar"}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dangerButton}
+                    onPress={handleExcluirConta}
+                    activeOpacity={0.8}
+                    disabled={isSubmitting}
+                  >
+                    <Text style={styles.dangerButtonText}>
+                      Apagar Minha conta
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
-                  style={styles.dangerButton}
-                  onPress={handleExcluirConta}
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
                   activeOpacity={0.8}
                   disabled={isSubmitting}
                 >
-                  <Text style={styles.dangerButtonText}>
-                    Apagar Minha conta
-                  </Text>
+                  <Text style={styles.logoutButtonText}>Sair da conta</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -430,6 +443,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingVertical: 24,
+    justifyContent: "center",
   },
   headerRow: {
     flexDirection: "row",
@@ -471,11 +485,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#ffffff",
   },
+  buttonsWrapper: {
+    marginTop: 24,
+    paddingHorizontal: 8,
+    alignItems: "center",
+  },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 24,
-    paddingHorizontal: 8,
+    width: "100%",
   },
   primaryButton: {
     flex: 1,
@@ -505,6 +523,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dangerButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  logoutButton: {
+    marginTop: 16,
+    width: "60%",
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#111827",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoutButtonText: {
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "700",

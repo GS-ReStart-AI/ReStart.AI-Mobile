@@ -1,79 +1,89 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Stack } from "expo-router";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { Slot } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BackgroundProvider } from "../src/context/BackgroundContext";
 
 type AuthData = {
   usuarioId: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string | null;
 };
 
-type AuthContextValue = {
+type AuthContextType = {
   auth: AuthData | null;
   isLoadingAuth: boolean;
-  setAuthData: (data: AuthData) => Promise<void>;
+  setAuthData: (data: AuthData | null) => Promise<void>;
   clearAuthData: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextValue>({
-  auth: null,
-  isLoadingAuth: true,
-  setAuthData: async () => {},
-  clearAuthData: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "@restartai/auth";
+export function useAuth(): AuthContextType {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider");
+  }
+  return ctx;
+}
 
-type AuthProviderProps = {
-  children: ReactNode;
-};
-
-function AuthProvider({ children }: AuthProviderProps) {
+function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<AuthData | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
     async function loadAuth() {
       try {
-        const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+        const stored = await AsyncStorage.getItem("@restartai/auth");
         if (stored) {
           const parsed = JSON.parse(stored) as AuthData;
-          setAuth(parsed);
+          if (parsed?.usuarioId && parsed?.token) {
+            setAuth(parsed);
+          }
         }
+      } catch (e) {
+        console.log("Erro ao carregar auth:", e);
       } finally {
         setIsLoadingAuth(false);
       }
     }
+
     loadAuth();
   }, []);
 
-  async function setAuthData(data: AuthData) {
+  async function setAuthData(data: AuthData | null) {
     setAuth(data);
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+    if (data) {
+      await AsyncStorage.setItem("@restartai/auth", JSON.stringify(data));
+    } else {
+      await AsyncStorage.removeItem("@restartai/auth");
+    }
   }
 
   async function clearAuthData() {
     setAuth(null);
-    await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+    await AsyncStorage.removeItem("@restartai/auth");
   }
 
   return (
-    <AuthContext.Provider value={{ auth, isLoadingAuth, setAuthData, clearAuthData }}>
+    <AuthContext.Provider
+      value={{ auth, isLoadingAuth, setAuthData, clearAuthData }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
 }
 
 export default function RootLayout() {
   return (
     <BackgroundProvider>
       <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Slot />
       </AuthProvider>
     </BackgroundProvider>
   );

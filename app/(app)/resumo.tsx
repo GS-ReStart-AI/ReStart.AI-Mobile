@@ -10,10 +10,11 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useBackground } from "../src/context/BackgroundContext";
-import AppLogo from "../src/components/AppLogo";
-import { api } from "../src/services/api";
-import { useAuth } from "./_layout";
+import { useBackground } from "../../src/context/BackgroundContext";
+import AppLogo from "../../src/components/AppLogo";
+import { api } from "../../src/services/api";
+import { useAuth } from "../_layout";
+import MenuController from "../../src/components/MenuController";
 
 type ResumoPerfilResponse = {
   Areas?: string[];
@@ -95,69 +96,73 @@ export default function ResumoApp() {
   };
 
   return (
-    <LinearGradient colors={background.colors} style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          <AppLogo />
-        </View>
+    <MenuController>
+      <LinearGradient colors={background.colors} style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <AppLogo />
+          </View>
 
-        <View style={styles.contentCard}>
-          <Text style={styles.title}>Resumo</Text>
-          <Text style={styles.subtitle}>
-            Analisamos seu currículo e encontramos:
-          </Text>
+          <View style={styles.contentCard}>
+            <Text style={styles.title}>Resumo</Text>
+            <Text style={styles.subtitle}>
+              Analisamos seu currículo e encontramos:
+            </Text>
 
-          {isLoading ? (
-            <View style={styles.loadingWrapper}>
-              <ActivityIndicator size="large" color="#FFFFFF" />
-            </View>
-          ) : (
-            <>
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Áreas compatíveis:</Text>
-                {areas.length > 0 ? (
-                  <View style={styles.chipList}>{renderChipList(areas)}</View>
-                ) : (
-                  <Text style={styles.emptyText}>
-                    Ainda não encontramos áreas compatíveis.
+            {isLoading ? (
+              <View style={styles.loadingWrapper}>
+                <ActivityIndicator size="large" color="#FFFFFF" />
+              </View>
+            ) : (
+              <>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Áreas compatíveis:</Text>
+                  {areas.length > 0 ? (
+                    <View style={styles.chipList}>{renderChipList(areas)}</View>
+                  ) : (
+                    <Text style={styles.emptyText}>
+                      Ainda não encontramos áreas compatíveis.
+                    </Text>
+                  )}
+                </View>
+
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>
+                    Papéis sugeridos para transição
                   </Text>
-                )}
-              </View>
+                  {roles.length > 0 ? (
+                    <View style={styles.chipList}>{renderChipList(roles)}</View>
+                  ) : (
+                    <Text style={styles.emptyText}>
+                      Ainda não há papéis sugeridos.
+                    </Text>
+                  )}
+                </View>
 
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                  Papéis sugeridos para transição
-                </Text>
-                {roles.length > 0 ? (
-                  <View style={styles.chipList}>{renderChipList(roles)}</View>
-                ) : (
-                  <Text style={styles.emptyText}>
-                    Ainda não há papéis sugeridos.
-                  </Text>
-                )}
-              </View>
-
-              <View style={styles.section}>
-                <TouchableOpacity
-                  style={styles.primaryButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/rotas",
-                      params: { usuarioId },
-                    })
-                  }
-                >
-                  <Text style={styles.primaryButtonText}>Próximos passos</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-        </View>
-      </ScrollView>
-    </LinearGradient>
+                <View style={styles.section}>
+                  <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/rotas",
+                        params: { usuarioId },
+                      })
+                    }
+                  >
+                    <Text style={styles.primaryButtonText}>
+                      Próximos passos
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </LinearGradient>
+    </MenuController>
   );
 }
 

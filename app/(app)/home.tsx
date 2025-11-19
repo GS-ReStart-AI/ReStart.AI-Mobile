@@ -14,11 +14,11 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useBackground } from "../src/context/BackgroundContext";
-import AppLogo from "../src/components/AppLogo";
-import MenuController from "../src/components/MenuController";
-import { api } from "../src/services/api";
-import { useAuth } from "./_layout";
+import { useBackground } from "../../src/context/BackgroundContext";
+import AppLogo from "../../src/components/AppLogo";
+import MenuController from "../../src/components/MenuController";
+import { api } from "../../src/services/api";
+import { useAuth } from "../_layout";
 
 export default function HomeApp() {
   const { background } = useBackground();
