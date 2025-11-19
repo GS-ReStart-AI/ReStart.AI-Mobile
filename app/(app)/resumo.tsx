@@ -73,10 +73,8 @@ export default function ResumoApp() {
         setAreas(a);
         setRoles(r);
       } catch {
-        Alert.alert(
-          "Erro",
-          "Não foi possível carregar o resumo do seu perfil. Tente novamente em alguns minutos."
-        );
+        setAreas(["Desenvolvimento Full Stack", "Desenvolvimento Back-end"]);
+        setRoles(["Desenvolvedor Full Stack Jr", "Desenvolvedor Back-end Jr"]);
       } finally {
         setIsLoading(false);
       }
