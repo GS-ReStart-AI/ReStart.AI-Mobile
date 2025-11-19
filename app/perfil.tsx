@@ -11,10 +11,9 @@ import {
   SafeAreaView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useBackground } from "../src/context/BackgroundContext";
-import { useAuth } from "../src/context/AuthContext";
+import { useAuth } from "./_layout";
 import AppLogo from "../src/components/AppLogo";
 import MenuController from "../src/components/MenuController";
 import { api } from "../src/services/api";
@@ -81,7 +80,7 @@ function onlyDigits(value: string): string {
 export default function PerfilApp() {
   const { background } = useBackground();
   const router = useRouter();
-  const { auth, isLoadingAuth, logout } = useAuth();
+  const { auth, isLoadingAuth, clearAuthData } = useAuth();
 
   const usuarioId = auth?.usuarioId ? String(auth.usuarioId) : undefined;
 
@@ -105,7 +104,10 @@ export default function PerfilApp() {
           [
             {
               text: "OK",
-              onPress: () => router.replace("/login"),
+              onPress: async () => {
+                await clearAuthData();
+                router.replace("/login");
+              },
             },
           ]
         );
@@ -132,18 +134,28 @@ export default function PerfilApp() {
         setDataNascimento(formatIsoToBr(dataIso));
         setEmail(emailApi);
         setSenha("");
-      } catch {
-        Alert.alert(
-          "Erro",
-          "Não foi possível carregar seus dados. Tente novamente em alguns minutos."
-        );
+      } catch (error: any) {
+        const mensagemBackend =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.response?.data?.mensagem ||
+          null;
+
+        if (mensagemBackend) {
+          Alert.alert("Erro ao carregar", mensagemBackend);
+        } else {
+          Alert.alert(
+            "Erro",
+            "Não foi possível carregar seus dados. Tente novamente em alguns minutos."
+          );
+        }
       } finally {
         setIsLoadingPerfil(false);
       }
     };
 
     carregarPerfil();
-  }, [usuarioId, isLoadingAuth, router]);
+  }, [usuarioId, isLoadingAuth, router, clearAuthData]);
 
   function handleCpfChange(text: string) {
     setCpf(formatCpf(text));
@@ -197,6 +209,8 @@ export default function PerfilApp() {
         cpf: cpfSomenteNumeros,
         dataNascimento: dataIso,
         email: email.trim(),
+        // Senha é obrigatória no backend; se o usuário não digitar nada,
+        // mandamos uma senha fake só para passar na validação.
         senha: senha.trim() || "SenhaPlaceholder123!",
       };
 
@@ -205,11 +219,24 @@ export default function PerfilApp() {
       Alert.alert("Sucesso", "Dados atualizados com sucesso.");
       setIsEditing(false);
       setSenha("");
-    } catch {
-      Alert.alert(
-        "Erro",
-        "Não foi possível atualizar seus dados. Tente novamente em alguns minutos."
-      );
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const mensagemBackend =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.mensagem ||
+        null;
+
+      if (status === 400 && mensagemBackend) {
+        Alert.alert("Erro de validação", mensagemBackend);
+      } else if (mensagemBackend) {
+        Alert.alert("Erro", mensagemBackend);
+      } else {
+        Alert.alert(
+          "Erro",
+          "Não foi possível atualizar seus dados. Tente novamente em alguns minutos."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -235,23 +262,28 @@ export default function PerfilApp() {
           onPress: async () => {
             try {
               await api.delete(`/api/v1/usuarios/${usuarioId}`);
-              await logout();
+              await clearAuthData();
               router.replace("/login");
-            } catch {
-              Alert.alert(
-                "Erro",
-                "Não foi possível apagar sua conta. Tente novamente em alguns minutos."
-              );
+            } catch (error: any) {
+              const mensagemBackend =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.response?.data?.mensagem ||
+                null;
+
+              if (mensagemBackend) {
+                Alert.alert("Erro", mensagemBackend);
+              } else {
+                Alert.alert(
+                  "Erro",
+                  "Não foi possível apagar sua conta. Tente novamente em alguns minutos."
+                );
+              }
             }
           },
         },
       ]
     );
-  }
-
-  async function handleLogout() {
-    await logout();
-    router.replace("/login");
   }
 
   return (
@@ -264,17 +296,7 @@ export default function PerfilApp() {
           >
             <View style={styles.headerRow}>
               <AppLogo />
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons
-                  name="logout"
-                  size={22}
-                  color="#111827"
-                />
-              </TouchableOpacity>
+              {/* botão de logout removido por enquanto */}
             </View>
 
             <Text style={styles.title}>Meus dados</Text>
@@ -414,21 +436,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
-  },
-  logoutButton: {
-    position: "absolute",
-    right: 0,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#ffffff",
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   title: {
     fontSize: 20,

@@ -183,13 +183,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: "#E5E7EB",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 24,
   },
@@ -199,14 +199,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#E5E7EB",
+    color: "#000000",
     marginBottom: 12,
     textAlign: "center",
   },
   sectionTitleCentered: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#E5E7EB",
+    color: "#000000",
     marginBottom: 16,
     textAlign: "center",
   },
@@ -232,19 +232,19 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
-    color: "#E5E7EB",
+    color: "#000000",
     textAlign: "center",
   },
   experienceText: {
     fontSize: 13,
-    color: "#E5E7EB",
+    color: "#000000",
     textAlign: "center",
   },
   primaryButton: {
     borderRadius: 24,
     paddingVertical: 18,
     paddingHorizontal: 24,
-    backgroundColor: "#6C8CFF",
+    backgroundColor: "#936cff",
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#ffffff",
     textAlign: "center",
   },
   loadingWrapper: {
