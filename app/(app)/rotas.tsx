@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#000000",
     textAlign: "center",
   },
   menuButton: {
@@ -221,13 +221,13 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 13,
-    color: "#E5E7EB",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 12,
   },
   highlightText: {
     fontSize: 14,
-    color: "#FFFFFF",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 24,
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   jobLabel: {
     fontSize: 12,
-    color: "#E5E7EB",
+    color: "#ffffff",
     marginBottom: 4,
   },
   jobTitle: {
@@ -254,13 +254,13 @@ const styles = StyleSheet.create({
   },
   matchLabel: {
     fontSize: 14,
-    color: "#E5E7EB",
+    color: "#000000",
     marginBottom: 4,
   },
   matchValue: {
     fontSize: 32,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#000000",
   },
   whySection: {
     marginBottom: 32,
@@ -268,13 +268,13 @@ const styles = StyleSheet.create({
   whyTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 8,
   },
   whyText: {
     fontSize: 13,
-    color: "#E5E7EB",
+    color: "#000000",
     textAlign: "center",
   },
   illustrationPlaceholder: {
