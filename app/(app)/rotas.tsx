@@ -84,7 +84,8 @@ export default function RotasApp() {
 
         const matchFromApi = data.match ?? data.Match;
         if (typeof matchFromApi === "number" && !Number.isNaN(matchFromApi)) {
-          setMatchPercent(matchFromApi);
+          const boundedMatch = Math.min(100, Math.max(1, matchFromApi));
+          setMatchPercent(boundedMatch);
         } else if (bestRole) {
           setMatchPercent(92);
         } else {
@@ -104,7 +105,6 @@ export default function RotasApp() {
           setMotivos(null);
         }
       } catch {
-        // Fallback amigável quando a API falha (ex: primeiro carregamento)
         setCargo("Desenvolvedor Full Stack Jr");
         setMatchPercent(15.38);
         setMotivos("Atende requisitos-chave: c#.");
