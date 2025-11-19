@@ -302,7 +302,7 @@ export default function PerfilApp() {
             <Text style={styles.title}>Meus dados</Text>
 
             <LinearGradient
-              colors={["#e3bfff", "#b5cffe"]}
+              colors={["#ffffff", "#6308ca"]}
               style={styles.cardWrapper}
             >
               <View style={styles.cardInner}>
@@ -354,7 +354,7 @@ export default function PerfilApp() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     placeholder="seuemail@exemplo.com"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor="#808b9e"
                   />
                 </View>
 
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 18,
     paddingVertical: 20,
-    backgroundColor: "#6b82d9",
+    backgroundColor: "rgb(216, 211, 241)",
   },
   fieldGroup: {
     marginBottom: 14,
@@ -467,9 +467,9 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 18,
     paddingHorizontal: 16,
-    backgroundColor: "#e5edff",
-    borderWidth: 1,
-    borderColor: "#c7d2fe",
+    backgroundColor: "#ffffff",
+    borderWidth: 2,
+    borderColor: "#ffffff",
   },
   buttonsRow: {
     flexDirection: "row",
@@ -482,12 +482,12 @@ const styles = StyleSheet.create({
     marginRight: 8,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#383381",
     alignItems: "center",
     justifyContent: "center",
   },
   primaryButtonOutline: {
-    backgroundColor: "#60a5fa",
+    backgroundColor: "#383381",
   },
   primaryButtonText: {
     color: "#ffffff",
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#fb7185",
+    backgroundColor: "#aa001a",
     alignItems: "center",
     justifyContent: "center",
   },
