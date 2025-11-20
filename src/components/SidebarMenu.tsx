@@ -157,6 +157,20 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose }) => {
                 />
                 <Text style={styles.itemText}>Perfil</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleNavigate("/sobre")}
+                style={styles.menuItem}
+              >
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={22}
+                  color="#000"
+                  style={styles.menuIcon}
+                />
+                <Text style={styles.itemText}>Sobre o app</Text>
+              </TouchableOpacity>
             </View>
           </LinearGradient>
         </Animated.View>
