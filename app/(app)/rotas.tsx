@@ -80,34 +80,52 @@ export default function RotasApp() {
         const bestRole =
           bestRoleFromApi ?? (roles.length > 0 ? roles[0] : null);
 
-        setCargo(bestRole);
+        let cargoFinal: string | null = bestRole;
 
         const matchFromApi = data.match ?? data.Match;
+        let matchFinal: number | null = null;
+
         if (typeof matchFromApi === "number" && !Number.isNaN(matchFromApi)) {
-          const boundedMatch = Math.min(100, Math.max(1, matchFromApi));
-          setMatchPercent(boundedMatch);
+          let normalized = matchFromApi;
+          if (normalized > 0 && normalized <= 1) {
+            normalized = normalized * 100;
+          }
+          const boundedMatch = Math.min(
+            100,
+            Math.max(1, Math.round(normalized))
+          );
+          matchFinal = boundedMatch;
         } else if (bestRole) {
-          setMatchPercent(92);
+          matchFinal = 92;
         } else {
-          setMatchPercent(null);
+          matchFinal = null;
         }
 
         const whyFromApi = data.whyYou ?? data.WhyYou;
+        let motivosFinal: string | null = null;
+
         if (whyFromApi && whyFromApi.trim().length > 0) {
-          setMotivos(whyFromApi.trim());
+          motivosFinal = whyFromApi.trim();
         } else if (bestRole && areas.length > 0) {
-          setMotivos(`Força em: ${areas.slice(0, 2).join(" · ")}`);
+          motivosFinal = `Força em: ${areas.slice(0, 2).join(" · ")}`;
         } else if (bestRole) {
-          setMotivos(
-            "Baseado nas suas experiências e competências mapeadas."
-          );
+          motivosFinal =
+            "Baseado nas suas experiências e competências mapeadas.";
         } else {
-          setMotivos(null);
+          motivosFinal = null;
         }
+
+        setCargo(cargoFinal);
+        setMatchPercent(matchFinal);
+        setMotivos(motivosFinal);
       } catch {
-        setCargo("Desenvolvedor Full Stack Jr");
-        setMatchPercent(15.38);
-        setMotivos("Atende requisitos-chave: c#.");
+        Alert.alert(
+          "Erro",
+          "Não foi possível carregar suas rotas de recolocação no momento."
+        );
+        setCargo(null);
+        setMatchPercent(null);
+        setMotivos(null);
       } finally {
         setIsLoading(false);
       }

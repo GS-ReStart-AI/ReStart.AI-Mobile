@@ -25,6 +25,16 @@ type ResumoPerfilResponse = {
   experiencias?: number;
 };
 
+const FALLBACK_AREAS = [
+  "Desenvolvimento Full Stack",
+  "Desenvolvimento Back-end",
+];
+
+const FALLBACK_ROLES = [
+  "Desenvolvedor Full Stack Jr",
+  "Desenvolvedor Back-end Jr",
+];
+
 export default function ResumoApp() {
   const { background } = useBackground();
   const router = useRouter();
@@ -67,14 +77,17 @@ export default function ResumoApp() {
 
         const data = response.data;
 
-        const a = data.areas ?? data.Areas ?? [];
-        const r = data.roles ?? data.Roles ?? [];
+        const aFromApi = data.areas ?? data.Areas ?? [];
+        const rFromApi = data.roles ?? data.Roles ?? [];
+
+        const a = aFromApi.length > 0 ? aFromApi : FALLBACK_AREAS;
+        const r = rFromApi.length > 0 ? rFromApi : FALLBACK_ROLES;
 
         setAreas(a);
         setRoles(r);
       } catch {
-        setAreas(["Desenvolvimento Full Stack", "Desenvolvimento Back-end"]);
-        setRoles(["Desenvolvedor Full Stack Jr", "Desenvolvedor Back-end Jr"]);
+        setAreas(FALLBACK_AREAS);
+        setRoles(FALLBACK_ROLES);
       } finally {
         setIsLoading(false);
       }

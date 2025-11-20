@@ -133,8 +133,31 @@ export default function Login() {
         Alert.alert("Credenciais inválidas", "Email ou senha incorretos.");
       } else {
         Alert.alert(
-          "Erro",
-          "Não foi possível realizar o login. Tente novamente."
+          "Erro de conexão",
+          "Não foi possível comunicar com o servidor. Deseja entrar em modo demonstração?",
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Entrar em modo demo",
+              onPress: async () => {
+                const demoUsuarioId = "demo-usuario";
+                const expiresAt = new Date(
+                  Date.now() + 60 * 60 * 1000
+                ).toISOString();
+
+                await setAuthData({
+                  usuarioId: demoUsuarioId,
+                  token: "demo-token",
+                  expiresAt,
+                });
+
+                router.push({
+                  pathname: "/home",
+                  params: { usuarioId: demoUsuarioId },
+                });
+              },
+            },
+          ]
         );
       }
     } finally {

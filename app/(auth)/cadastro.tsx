@@ -95,7 +95,10 @@ export default function Cadastro() {
       valor = valor.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
     }
     if (valor.length > 11) {
-      valor = valor.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+      valor = valor.replace(
+        /^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/,
+        "$1.$2.$3-$4"
+      );
     } else if (valor.length > 11 - 2) {
       valor = valor.replace(
         /^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})?$/,
@@ -210,10 +213,35 @@ export default function Cadastro() {
           "Acesso negado",
           "Falha na autenticação da API. Verifique a API key."
         );
+      } else if (mensagemBackend) {
+        Alert.alert("Erro", mensagemBackend);
       } else {
         Alert.alert(
-          "Erro",
-          "Não foi possível realizar o cadastro. Tente novamente."
+          "Erro de conexão",
+          "Não foi possível comunicar com o servidor. Deseja entrar em modo demonstração?",
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Entrar em modo demo",
+              onPress: async () => {
+                const demoUsuarioId = "demo-usuario";
+                const expiresAt = new Date(
+                  Date.now() + 60 * 60 * 1000
+                ).toISOString();
+
+                await setAuthData({
+                  usuarioId: demoUsuarioId,
+                  token: "demo-token",
+                  expiresAt,
+                });
+
+                router.push({
+                  pathname: "/home",
+                  params: { usuarioId: demoUsuarioId },
+                });
+              },
+            },
+          ]
         );
       }
     } finally {
