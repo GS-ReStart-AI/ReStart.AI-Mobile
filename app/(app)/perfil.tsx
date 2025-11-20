@@ -17,6 +17,7 @@ import { useAuth } from "../_layout";
 import AppLogo from "../../src/components/AppLogo";
 import MenuController from "../../src/components/MenuController";
 import { api } from "../../src/services/api";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 type UsuarioResponse = {
   UsuarioId?: string;
@@ -121,10 +122,7 @@ export default function PerfilApp() {
         );
 
         const data = response.data;
-        const nome =
-          data.NomeCompleto ??
-          data.nomeCompleto ??
-          "";
+        const nome = data.NomeCompleto ?? data.nomeCompleto ?? "";
         const cpfApi = data.Cpf ?? data.cpf ?? "";
         const dataIso = data.DataNascimento ?? data.dataNascimento ?? "";
         const emailApi = data.Email ?? data.email ?? "";
@@ -170,6 +168,14 @@ export default function PerfilApp() {
   }
 
   async function handleSalvar() {
+    if (isLoadingPerfil || isLoadingAuth) {
+      Alert.alert(
+        "Carregando",
+        "Ainda estamos carregando seus dados. Aguarde um instante e tente novamente."
+      );
+      return;
+    }
+
     if (!usuarioId) {
       Alert.alert(
         "Sessão expirada",
@@ -303,11 +309,14 @@ export default function PerfilApp() {
 
             <Text style={styles.title}>Meus dados</Text>
 
-            <LinearGradient
-              colors={["#ffffff", "#6308ca"]}
-              style={styles.cardWrapper}
-            >
-              <View style={styles.cardInner}>
+            <View style={styles.window}>
+              <View style={styles.windowHeader}>
+                <View style={[styles.windowDot, styles.dotRed]} />
+                <View style={[styles.windowDot, styles.dotYellow]} />
+                <View style={[styles.windowDot, styles.dotGreen]} />
+              </View>
+
+              <View style={styles.windowBody}>
                 <View style={styles.fieldGroup}>
                   <Text style={styles.label}>Nome completo:</Text>
                   <TextInput
@@ -359,25 +368,12 @@ export default function PerfilApp() {
                     placeholderTextColor="#808b9e"
                   />
                 </View>
-
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>Senha:</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={senha}
-                    editable={isEditing}
-                    onChangeText={setSenha}
-                    secureTextEntry
-                    placeholder="Digite uma nova senha (opcional)"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
               </View>
-            </LinearGradient>
+            </View>
 
             {isLoadingPerfil ? (
               <View style={styles.loadingWrapper}>
-                <ActivityIndicator size="large" color="#ffffff" />
+                <ActivityIndicator size="large" color="#E5E7EB" />
               </View>
             ) : (
               <View style={styles.buttonsWrapper}>
@@ -391,37 +387,61 @@ export default function PerfilApp() {
                       isEditing ? handleSalvar() : setIsEditing(true)
                     }
                     disabled={isSubmitting}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                   >
-                    <Text style={styles.primaryButtonText}>
-                      {isEditing
-                        ? isSubmitting
-                          ? "Salvando..."
-                          : "Salvar"
-                        : "editar"}
-                    </Text>
+                    <View style={styles.buttonContent}>
+                      <Feather
+                        name={isEditing ? "save" : "edit-3"}
+                        size={18}
+                        color="#F9FAFB"
+                      />
+                      <Text style={styles.primaryButtonText}>
+                        {isEditing
+                          ? isSubmitting
+                            ? "Salvando..."
+                            : "Salvar"
+                          : "Editar"}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.dangerButton}
                     onPress={handleExcluirConta}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                     disabled={isSubmitting}
                   >
-                    <Text style={styles.dangerButtonText}>
-                      Apagar Minha conta
-                    </Text>
+                    <View style={styles.buttonContent}>
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={18}
+                        color="#FEF2F2"
+                      />
+                      <Text style={styles.dangerButtonText}>
+                        Apagar Minha conta
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
                   style={styles.logoutButton}
                   onPress={handleLogout}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                   disabled={isSubmitting}
                 >
-                  <Text style={styles.logoutButtonText}>Sair da conta</Text>
+                  <View style={styles.buttonContent}>
+                    <Feather name="log-out" size={18} color="#E5E7EB" />
+                    <Text style={styles.logoutButtonText}>Sair da conta</Text>
+                  </View>
                 </TouchableOpacity>
+              </View>
+            )}
+
+            {isSubmitting && (
+              <View style={styles.savingOverlay}>
+                <ActivityIndicator size="small" color="#F9FAFB" />
+                <Text style={styles.savingText}>Salvando alterações...</Text>
               </View>
             )}
           </ScrollView>
@@ -444,30 +464,53 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 24,
     justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
   },
   headerRow: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
     color: "#111827",
     textAlign: "center",
-    marginBottom: 16,
   },
-  cardWrapper: {
-    borderRadius: 32,
-    padding: 2,
-    marginTop: 4,
+  window: {
+    width: "100%",
+    maxWidth: 360,
+    borderRadius: 24,
+    backgroundColor: "rgba(109, 109, 109, 0)",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.85)",
+    marginTop: 12,
   },
-  cardInner: {
-    borderRadius: 30,
+  windowHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 6,
+  },
+  windowDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  dotRed: {
+    backgroundColor: "#f97373",
+  },
+  dotYellow: {
+    backgroundColor: "#facc15",
+  },
+  dotGreen: {
+    backgroundColor: "#22c55e",
+  },
+  windowBody: {
     paddingHorizontal: 18,
-    paddingVertical: 20,
-    backgroundColor: "rgb(216, 211, 241)",
+    paddingVertical: 18,
   },
   fieldGroup: {
     marginBottom: 14,
@@ -489,60 +532,80 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 8,
     alignItems: "center",
+    width: "100%",
   },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    maxWidth: 360,
   },
   primaryButton: {
     flex: 1,
     marginRight: 8,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#383381",
+    backgroundColor: "#6366F1",
     alignItems: "center",
     justifyContent: "center",
   },
   primaryButtonOutline: {
-    backgroundColor: "#383381",
+    backgroundColor: "#818CF8",
   },
   primaryButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
+    color: "#F9FAFB",
+    fontSize: 15,
     fontWeight: "700",
-    textTransform: "capitalize",
+    marginLeft: 8,
   },
   dangerButton: {
     flex: 1,
     marginLeft: 8,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#aa001a",
+    backgroundColor: "#F97373",
     alignItems: "center",
     justifyContent: "center",
   },
   dangerButtonText: {
-    color: "#ffffff",
+    color: "#FEF2F2",
     fontSize: 14,
     fontWeight: "700",
+    marginLeft: 8,
   },
   logoutButton: {
     marginTop: 16,
     width: "60%",
+    maxWidth: 260,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#111827",
+    backgroundColor: "rgba(15, 23, 42, 0.9)",
     alignItems: "center",
     justifyContent: "center",
   },
   logoutButtonText: {
-    color: "#ffffff",
+    color: "#E5E7EB",
     fontSize: 14,
     fontWeight: "700",
+    marginLeft: 8,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingWrapper: {
     marginTop: 24,
     alignItems: "center",
+  },
+  savingOverlay: {
+    marginTop: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  savingText: {
+    fontSize: 12,
+    color: "#F9FAFB",
   },
 });
