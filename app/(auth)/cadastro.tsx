@@ -201,10 +201,10 @@ export default function Cadastro() {
       ]);
     } catch (error: any) {
       const status = error?.response?.status;
+      const data = error?.response?.data;
       const mensagemBackend =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        null;
+        data?.message || data?.error || data?.mensagem || null;
+      const isNetworkError = !error?.response;
 
       if (status === 400 && mensagemBackend) {
         Alert.alert("Erro de validação", mensagemBackend);
@@ -213,9 +213,9 @@ export default function Cadastro() {
           "Acesso negado",
           "Falha na autenticação da API. Verifique a API key."
         );
-      } else if (mensagemBackend) {
+      } else if (!isNetworkError && mensagemBackend) {
         Alert.alert("Erro", mensagemBackend);
-      } else {
+      } else if (isNetworkError) {
         Alert.alert(
           "Erro de conexão",
           "Não foi possível comunicar com o servidor. Deseja entrar em modo demonstração?",
@@ -242,6 +242,11 @@ export default function Cadastro() {
               },
             },
           ]
+        );
+      } else {
+        Alert.alert(
+          "Erro",
+          "Não foi possível realizar o cadastro. Tente novamente."
         );
       }
     } finally {

@@ -128,10 +128,16 @@ export default function Login() {
       ]);
     } catch (error: any) {
       const status = error?.response?.status;
+      const data = error?.response?.data;
+      const mensagemBackend =
+        data?.message || data?.error || data?.mensagem || null;
+      const isNetworkError = !error?.response;
 
       if (status === 401) {
         Alert.alert("Credenciais inválidas", "Email ou senha incorretos.");
-      } else {
+      } else if (!isNetworkError && mensagemBackend) {
+        Alert.alert("Erro", mensagemBackend);
+      } else if (isNetworkError) {
         Alert.alert(
           "Erro de conexão",
           "Não foi possível comunicar com o servidor. Deseja entrar em modo demonstração?",
@@ -158,6 +164,11 @@ export default function Login() {
               },
             },
           ]
+        );
+      } else {
+        Alert.alert(
+          "Erro",
+          "Não foi possível realizar o login. Tente novamente."
         );
       }
     } finally {
