@@ -131,10 +131,10 @@ Passos:
 ### 5. Links importantes 🔗
 
 🎬 Vídeo de demonstração  
-Link: 
+Link: https://youtu.be/C_S6TsNUuNE
 
 📦 Download do APK  
-Link: 
+Link: https://expo.dev/artifacts/eas/jAiFNaRx2sAqoFZb2yw7R7.apk
 
 ----------------------------------
 ### Equipe 👥
@@ -143,3 +143,4 @@ Link:
 * ⭐️ **Mirela Pinheiro Silva Rodrigues** — RM: **558191**
 
 ----------------------------------
+
