@@ -100,9 +100,10 @@ Tecnologias principais:
 
 🌐 API ReStart.AI (Azure)
 - Cliente HTTP configurado com Axios:
-  - `baseURL`: https://restartai-api-001.azurewebsites.net
+  - `baseURL`: https://restartai-api-001.azurewebsites.net/swagger/index.html
   - Timeout configurado para evitar travamentos
-  - Header com `x-api-key` para autenticação da API
+  - Header com `x-api-key` para autenticação da API 
+  - dev-swagger-key-123
 ----------------------------------
 ### 4. Como rodar o app localmente 🛠️
 
@@ -143,4 +144,5 @@ Link: https://expo.dev/artifacts/eas/jAiFNaRx2sAqoFZb2yw7R7.apk
 * ⭐️ **Mirela Pinheiro Silva Rodrigues** — RM: **558191**
 
 ----------------------------------
+
 
